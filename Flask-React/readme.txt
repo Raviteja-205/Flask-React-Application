@@ -5,6 +5,6 @@ PART 1
 
 PART 2A
 1) I have done both JWT and GOOGLE authentications included in authorization_apis folder
-2) Jwt_auth for json web token and google_auth for goofle authorization_apis\
+2) Jwt_auth for json web token and google_auth for google in flask-api
 3) both needs t be run seperately and have the tokens verified.
 
