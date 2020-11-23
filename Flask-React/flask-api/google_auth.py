@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, session
+from flask import Flask, redirect, url_for, session, render_template, request
 from authlib.integrations.flask_client import OAuth
 import os
 from datetime import timedelta
@@ -28,18 +28,29 @@ google = oauth.register(
 
 
 @app.route('/')
-@login_required
+# @login_required
 def hello_world():
+    if not session.get('logged_in'):
+        return render_template('signin.html')
+    else:
+        return 'Currently logged in'
+    email = dict(session)['profile']['email']
+    return f'Hello, you are logged in as {email}!'
+
+@app.route('/success')
+
+def success():
     email = dict(session)['profile']['email']
     return f'Hello, you are logge in as {email}!'
 
-
-@app.route('/login')
+@app.route('/login', methods=['POST'])
 def login():
-    google = oauth.create_client('google')
-    redirect_uri = url_for('authorize', _external=True)
-    return google.authorize_redirect(redirect_uri)
-
+    if request.form['username'] and request.form['password'] == 'secret':
+        google = oauth.create_client('google')
+        redirect_uri = url_for('authorize', _external=True)
+        return google.authorize_redirect(redirect_uri)
+    else:
+        return "Sorruy wrong credentials"
 
 @app.route('/authorize')
 def authorize():
@@ -50,7 +61,7 @@ def authorize():
     user = oauth.google.userinfo()  
     session['profile'] = user_info
     session.permanent = True
-    return redirect('/')
+    return redirect('/success')
 
 
 @app.route('/logout')
@@ -58,3 +69,7 @@ def logout():
     for key in list(session.keys()):
         session.pop(key)
     return redirect('/')
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
